@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tirage au sort - Tournoi Féminin</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+  <style>
+    :root { --accent: #d8135a; }
+
+    html, body {
+      height: 100%;
+      overflow: hidden;
+    }
+    body {
+      display: flex;
+      flex-direction: column;
+    }
+
+    nav {
+      position: relative !important;
+      flex-shrink: 0;
+      flex-direction: row !important;
+      height: auto !important;
+      padding: 0.5rem 2rem;
+      gap: 1rem;
+      justify-content: center;
+      align-items: center;
+      z-index: 100;
+    }
+
+    .intro {
+      padding: 0.75rem 2rem 0.5rem;
+      font-family: 'DM Sans', sans-serif;
+      text-align: center;
+      border-bottom: 1px solid #ddd8cc;
+      flex-shrink: 0;
+    }
+    .intro-title {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 1.1rem;
+      color: #1b213e;
+      margin-bottom: 0.35rem;
+    }
+    .intro-desc {
+      font-size: 0.82rem;
+      color: #666;
+      line-height: 1.7;
+      max-width: 820px;
+      margin: 0 auto;
+    }
+
+    #app {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      min-height: 0;
+    }
+
+    .main-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      padding: 0.75rem 1.25rem;
+      overflow: hidden;
+      min-height: 0;
+    }
+
+    .card {
+      flex: 0 0 auto;
+      display: flex;
+      flex-direction: column;
+      padding: 0.9rem 1rem !important;
+      margin-bottom: 0 !important;
+      width: 100%;
+    }
+
+    .chapeaux-grid {
+      display: flex;
+      gap: 0.5rem;
+      flex: 0 0 auto;
+      align-items: flex-start;
+    }
+    .chapeau-col { flex: 1; min-width: 0; }
+    .chapeau-label {
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--muted);
+      margin-bottom: 0.3rem;
+      transition: color 0.3s;
+    }
+    .chapeau-equipe {
+      font-size: 0.72rem;
+      padding: 0.2rem 0.4rem;
+      border-radius: 5px;
+      margin-bottom: 0.2rem;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      line-height: 1.4;
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+    .chapeau-equipe.tirée {
+      opacity: 0.3;
+      text-decoration: line-through;
+    }
+    .equipe-nom {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      flex: 1;
+      min-width: 0;
+    }
+    .equipe-logo {
+      width: 18px;
+      height: 18px;
+      object-fit: contain;
+      flex-shrink: 0;
+      border-radius: 2px;
+    }
+
+    .btn-row {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 0.5rem;
+    }
+
+    .poules-grid {
+      display: flex;
+      gap: 0.5rem;
+      flex: 0 0 auto;
+      align-items: flex-start;
+    }
+    .group-card {
+      flex: 1;
+      min-width: 0;
+      padding: 0.6rem 0.7rem !important;
+      margin-bottom: 0 !important;
+      text-align: left;
+    }
+    .group-header {
+      font-size: 0.75rem !important;
+      margin-bottom: 0.4rem !important;
+      padding-bottom: 0.3rem !important;
+    }
+    .group-member {
+      padding: 0.15rem 0 !important;
+      font-size: 0.75rem !important;
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 0.3rem;
+    }
+    .member-name { text-align: left; }
+    .group-member .equipe-logo { width: 16px; height: 16px; }
+
+    .card-title { font-size: 0.9rem !important; margin-bottom: 0.6rem !important; }
+
+    .btn { padding: 0.45rem 0.9rem !important; font-size: 0.82rem !important; }
+    .btn-primary {
+      background: #d8135a !important;
+      border-color: #d8135a !important;
+      padding: 0.5rem !important;
+    }
+    .btn-primary:hover {
+      background: #b50f4c !important;
+      border-color: #b50f4c !important;
+    }
+    .btn-primary:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none !important;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ── Overlay tirage ── -->
+  <div id="tirage-overlay">
+    <div id="tirage-backdrop"></div>
+    <div id="tirage-card">
+      <div id="tirage-chapeau-label">Chapeau 1</div>
+      <img id="tirage-logo" src="" alt="" />
+      <div id="tirage-equipe-name">Équipe</div>
+      <div id="tirage-poule-label">→ Poule <strong>1</strong></div>
+    </div>
+  </div>
+
+  <nav>
+    <img src="img/logo_off.png" alt="Logo AS Béziers Football" style="height:70px; object-fit:contain;" />
+    <div style="font-family:'Syne',sans-serif; font-weight:800; font-size:1.2rem; color:#fff; letter-spacing:-0.5px;">
+      Tirage au sort &ndash; <span style="color:#d8135a;">Tournoi Féminin</span>
+    </div>
+  </nav>
+
+  <div class="intro">
+    <div class="intro-title">
+      Bienvenue au tirage au sort des poules &mdash; <span style="color:#d8135a;">Édition 2026</span> · Tournoi Féminin de l'Ascension
+    </div>
+    <div class="intro-desc">
+      <strong style="color:#1b213e;">24 équipes</strong> participantes sont réparties en
+      <strong style="color:#1b213e;">6 chapeaux</strong> de 4 équipes, constitués selon le niveau sportif.
+      À chaque clic, une équipe est tirée <strong style="color:#1b213e;">aléatoirement</strong> dans le chapeau courant
+      et assignée à la première poule n'en possédant pas encore une.
+      Les chapeaux sont parcourus <strong style="color:#1b213e;">dans l'ordre</strong> (1 → 6) pour garantir
+      un équilibre sportif dans chaque poule.
+      Au terme du tirage, <strong style="color:#1b213e;">4 poules de 6 équipes</strong> seront constituées.
+    </div>
+  </div>
+
+  <div id="app">
+    <div class="main-content">
+
+      <!-- CARD 1 : chapeaux -->
+      <div class="card">
+        <div class="card-title">Catégorie U13F</div>
+
+        <div class="chapeaux-grid">
+          <div
+            v-for="(chapeau, cIdx) in chapeaux"
+            :key="cIdx"
+            class="chapeau-col"
+            :class="{ 'active-chapeau': activeChapeauIdx === cIdx }"
+          >
+            <div class="chapeau-label">Chapeau {{ cIdx + 1 }}</div>
+            <div
+              v-for="equipe in chapeau"
+              :key="equipe"
+              class="chapeau-equipe"
+              :class="{ tirée: equipeEstTirée(equipe) }"
+              :title="equipe"
+            >
+              <img
+                v-if="logos[equipe]"
+                :src="logos[equipe]"
+                :alt="equipe"
+                class="equipe-logo"
+                @error="$event.target.style.display='none'"
+              />
+              <span class="equipe-nom">{{ equipe }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="btn-row">
+          <button class="btn btn-outline" @click="resetTirage">Réinitialiser</button>
+          <button
+            class="btn btn-primary"
+            style="flex:1;"
+            @click="tirageEquipe"
+            :disabled="tirageFini || isAnimating"
+          >
+            {{ tirageFini ? 'Tirage terminé ✓' : 'Tirer une équipe au hasard' }}
+          </button>
+        </div>
+      </div>
+
+      <!-- CARD 2 : poules -->
+      <div class="card">
+        <div class="card-title">Répartition dans les poules</div>
+
+        <div class="poules-grid">
+          <div v-for="(poule, idx) in poules" :key="idx" class="group-card">
+            <div class="group-header">
+              Poule {{ idx + 1 }}
+              <small style="font-weight:500; text-transform:none; letter-spacing:0;">({{ poule.length }}/6)</small>
+            </div>
+            <div v-for="i in 6" :key="i" class="group-member" :class="{ 'new-entry': poule[i-1] && isNewMember(idx, i-1) }">
+              <template v-if="poule[i-1]">
+                <img
+                  v-if="logos[poule[i-1]]"
+                  :src="logos[poule[i-1]]"
+                  :alt="poule[i-1]"
+                  class="equipe-logo"
+                  @error="$event.target.style.display='none'"
+                />
+                <span class="member-name">{{ poule[i-1] }}</span>
+              </template>
+              <span v-else style="color:#ccc; font-size:0.75rem;">(vide)</span>
+            </div>
+          </div>
+        </div>
+
+        <div v-if="tirageFini" style="margin-top:0.75rem; text-align:center; color:#d8135a; font-family:'Syne',sans-serif; font-weight:800; font-size:1rem;" class="tirage-fin">
+          🎉 Tirage terminé !
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script src="index.js"></script>
+</body>
+</html>
