@@ -1,0 +1,9 @@
+{
+  "name": "tournoi-feminine",
+  "version": "1.0.0",
+  "description": "Site du tournoi féminine",
+  "main": "Index.js",
+  "scripts": {},
+  "author": "",
+  "license": "ISC"
+}
